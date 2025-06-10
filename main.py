@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 import shutil
 import uvicorn
 import traceback
+from fastapi import status
 
 
 os.environ["NEMO_DISABLE_TDT_CUDA_GRAPHS"] = "1"
@@ -75,6 +76,29 @@ async def transcribe_audio(file: UploadFile = File(...)):
             status_code=500,
             content={"traceback": traceback.format_exc()}
         )
+
+
+@app.get("/live", status_code=status.HTTP_200_OK)
+def health_check():
+    test_audio = "./audios/hello.wav"
+    global asr_model
+
+    if not os.path.exists(test_audio):
+        return JSONResponse(status_code=502, content={"error": "Test audio file not found"})
+
+    if asr_model is None:
+        return JSONResponse(status_code=503, content={"error": "ASR model not loaded"})
+
+    try:
+        transcript = transcribe_with_burst_filter(test_audio)
+
+        if transcript.strip() == "":
+            return JSONResponse(status_code=502, content={"error": "Empty transcript"})
+
+        return JSONResponse(status_code=200, content={"transcript": transcript, "status": "ok"})
+
+    except Exception:
+        return JSONResponse(status_code=502, content={"traceback": traceback.format_exc()})
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
