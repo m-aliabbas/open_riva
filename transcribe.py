@@ -47,6 +47,7 @@ print(f"🎧 Found {len(audio_files)} audio files in '{AUDIO_DIR}/'.")
 
 # Process each file
 for wav_path in audio_files:
+    # if '41' in wav_path:
     print(f"\n🔊 Processing: {os.path.basename(wav_path)}")
     transcript = transcribe_with_burst_filter(wav_path)
     print(f"📝 Transcript: {transcript if transcript else '[EMPTY]'}")

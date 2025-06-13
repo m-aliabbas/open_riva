@@ -6,8 +6,13 @@ import uvicorn
 import traceback
 from fastapi import status
 
-
+from dotenv import load_dotenv
+load_dotenv()
+WHISPER_AT_ADDRESS = os.getenv("WHISPER_AT_ADDRESS", "localhost:121")
 os.environ["NEMO_DISABLE_TDT_CUDA_GRAPHS"] = "1"
+from whisper_at_client import WhisperATClient
+
+whisper_at_client = WhisperATClient(WHISPER_AT_ADDRESS)
 
 import nemo.collections.asr as nemo_asr
 
@@ -30,15 +35,15 @@ def load_model():
         asr_model = None
 
 
-def transcribe_with_burst_filter(filepath: str) -> str:
+def transcribe_with_burst_filter(filepath: str,helping_asr=False) -> str:
     global asr_model
-
+    asr_status = 'p'
     if asr_model is None:
         raise RuntimeError("ASR model is not loaded")
 
     output = asr_model.transcribe([filepath], timestamps=True)
     hyp = output[0]
-
+    # print(hyp)
     segments = hyp.timestamp.get("segment", [])
     cleaned_segments = []
 
@@ -48,8 +53,14 @@ def transcribe_with_burst_filter(filepath: str) -> str:
             cleaned_segments.append(seg["segment"])
         else:
             print(f"🚫 Short burst removed: '{seg['segment']}' ({duration:.2f}s)")
-
-    return " ".join(cleaned_segments).strip()
+    text = " ".join(cleaned_segments).strip()
+    
+    if helping_asr and len(text) < 1:
+        response = whisper_at_client.transcribe(filepath)
+        # print('AT Response',response)
+        text = response.get("final_text","")
+        asr_status = 'wat'
+    return text,asr_status
 
 
 @app.post("/transcribe/")
@@ -65,10 +76,10 @@ async def transcribe_audio(file: UploadFile = File(...)):
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        transcript = transcribe_with_burst_filter(temp_path)
+        transcript,asr_status = transcribe_with_burst_filter(temp_path,helping_asr=True)
         os.remove(temp_path)
 
-        return {"transcript": transcript}
+        return {"transcript": transcript,'asr_name':asr_status}
     
     except Exception:
         # Return full traceback
@@ -90,10 +101,13 @@ def health_check():
         return JSONResponse(status_code=503, content={"error": "ASR model not loaded"})
 
     try:
-        transcript = transcribe_with_burst_filter(test_audio)
+        transcript,asr_status = transcribe_with_burst_filter(test_audio)
 
         if transcript.strip() == "":
             return JSONResponse(status_code=502, content={"error": "Empty transcript"})
+
+        elif asr_status == 'wat':
+            return JSONResponse(status_code=502, content={"error": "Empty transcript"}) 
 
         return JSONResponse(status_code=200, content={"transcript": transcript, "status": "ok"})
 
