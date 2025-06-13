@@ -8,7 +8,8 @@ from fastapi import status
 
 from dotenv import load_dotenv
 load_dotenv()
-WHISPER_AT_ADDRESS = os.getenv("WHISPER_AT_ADDRESS", "localhost:121")
+
+WHISPER_AT_ADDRESS = os.getenv("WHISPER_AT_ADDRESS","http://127.0.0.1:9007")
 os.environ["NEMO_DISABLE_TDT_CUDA_GRAPHS"] = "1"
 from whisper_at_client import WhisperATClient
 
