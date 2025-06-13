@@ -9,7 +9,7 @@ class WhisperATClient:
         file_path: str,
         audio_tagging_time_resolution: int = 10,
         temperature: float = 0.01,
-        no_speech_threshold: float = 0.4
+        no_speech_threshold: float = 0.6
     ) -> dict:
         """
         Sends an audio file to the transcription API and returns filtered transcript.
@@ -59,7 +59,7 @@ class WhisperATClient:
         filtered_text = " ".join(
             segment["text"].strip()
             for segment in segments
-            if segment.get("no_speech_prob", 1.0) < threshold
+            if segment.get("no_speech_prob", 0.7) < threshold
         )
         return filtered_text.strip()
 
