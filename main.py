@@ -37,32 +37,38 @@ def load_model():
 
 
 def transcribe_with_burst_filter(filepath: str,helping_asr=False) -> str:
-    global asr_model
-    asr_status = 'p'
-    if asr_model is None:
-        raise RuntimeError("ASR model is not loaded")
+    try:
+        global asr_model
+        asr_status = 'p'
+        if asr_model is None:
+            raise RuntimeError("ASR model is not loaded")
 
-    output = asr_model.transcribe([filepath], timestamps=True)
-    hyp = output[0]
-    # print(hyp)
-    segments = hyp.timestamp.get("segment", [])
-    cleaned_segments = []
+        output = asr_model.transcribe([filepath], timestamps=True)
+        hyp = output[0]
+        # print(hyp)
+        segments = hyp.timestamp.get("segment", [])
+        cleaned_segments = []
 
-    for seg in segments:
-        duration = seg["end"] - seg["start"]
-        if duration > SHORT_BURST_THRESHOLD:
-            cleaned_segments.append(seg["segment"])
-        else:
-            print(f"🚫 Short burst removed: '{seg['segment']}' ({duration:.2f}s)")
-    text = " ".join(cleaned_segments).strip()
-    
-    if helping_asr and len(text) < 1:
+        for seg in segments:
+            duration = seg["end"] - seg["start"]
+            if duration > SHORT_BURST_THRESHOLD:
+                cleaned_segments.append(seg["segment"])
+            else:
+                print(f"🚫 Short burst removed: '{seg['segment']}' ({duration:.2f}s)")
+        text = " ".join(cleaned_segments).strip()
+        
+        if helping_asr and len(text) < 1:
+            response = whisper_at_client.transcribe(filepath)
+            # print('AT Response',response)
+            text = response.get("final_text","")
+            asr_status = 'wat'
+        return text,asr_status
+    except:
         response = whisper_at_client.transcribe(filepath)
         # print('AT Response',response)
         text = response.get("final_text","")
         asr_status = 'wat'
-    return text,asr_status
-
+        return text,asr_status
 
 @app.post("/transcribe/")
 async def transcribe_audio(file: UploadFile = File(...)):
