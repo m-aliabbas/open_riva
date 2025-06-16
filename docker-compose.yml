@@ -2,11 +2,11 @@ version: "3.9"
 
 services:
   open_riva:
-    image: v5-lines/open_riza:v1.0.0          # or `build: .` if you prefer
+    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/open_riva:v1.0.0          # or `build: .` if you prefer
     container_name: open_riva
     ports:
-      - "7006:7006"
-    # networks:
+      - "7005:7005"
+    # networks: #you need to turn this on when needed
     #   - whisper-net
     environment:
       # runtime settings
