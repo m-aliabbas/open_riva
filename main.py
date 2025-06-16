@@ -96,7 +96,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
         )
 
 
-@app.get("/live", status_code=status.HTTP_200_OK)
+@app.get("/health", status_code=status.HTTP_200_OK)
 def health_check():
     test_audio = "./audios/hello.wav"
     global asr_model

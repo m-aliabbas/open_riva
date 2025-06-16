@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  open_riva:
+    image: v5-lines/open_riza:v1.0.0          # or `build: .` if you prefer
+    container_name: open_riva
+    ports:
+      - "7006:7006"
+    # networks:
+    #   - whisper-net
+    environment:
+      # runtime settings
+      WHISPER_AT_ADDRESS: http://148.251.195.218:9007
+      # 👇 override the default 1 worker here
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-1}   # set 4 (or any number) in .env or CLI
+      NVIDIA_VISIBLE_DEVICES: all
+
+    deploy:                                   # remove if not using Swarm
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7006/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
