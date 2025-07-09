@@ -22,7 +22,7 @@ def load_model():
     global asr_pipe
     try:
         print("🔄 Loading HuggingFace Whisper model...")
-        asr_pipe = pipeline("automatic-speech-recognition", model="m-aliabbas1/whisper-pak_en",device=device)
+        asr_pipe = pipeline("automatic-speech-recognition", model="openai/whisper-large-v3",device=device)
         print("✅ Model loaded successfully.")
     except Exception as e:
         print(f"❌ Failed to load Whisper model: {e}")

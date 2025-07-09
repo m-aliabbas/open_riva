@@ -5,7 +5,7 @@ import shutil
 import uvicorn
 import traceback
 from fastapi import status
-
+from VAD import SpeechClassifier
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -15,6 +15,7 @@ os.environ["NEMO_DISABLE_TDT_CUDA_GRAPHS"] = "1"
 from whisper_at_client import WhisperATClient
 
 whisper_at_client = WhisperATClient(WHISPER_AT_ADDRESS)
+vad = SpeechClassifier()
 
 import nemo.collections.asr as nemo_asr
 
@@ -84,9 +85,14 @@ async def transcribe_audio(file: UploadFile = File(...)):
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        transcript,asr_status = transcribe_with_burst_filter(temp_path,helping_asr=True)
+        result = vad.has_speech(temp_path, threshold=0.49, verbose=True)
+        if result:
+            transcript,asr_status = transcribe_with_burst_filter(temp_path,helping_asr=True)
+        else:
+            transcript = ""
+            asr_status = 'vad'
+            
         os.remove(temp_path)
-
         return {"transcript": transcript,'asr_name':asr_status}
     
     except Exception:

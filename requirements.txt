@@ -213,3 +213,4 @@ wget==3.2
 wrapt==1.17.2
 xxhash==3.5.0
 yarl==1.20.1
+silero-vad
