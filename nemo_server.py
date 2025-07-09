@@ -11,6 +11,7 @@ load_dotenv()
 
 
 WHISPER_AT_ADDRESS = os.getenv("WHISPER_AT_ADDRESS","http://127.0.0.1:9007")
+VAD_THRESHOLD = float(os.getenv("VAD_THRESHOLD", 0.49))
 os.environ["NEMO_DISABLE_TDT_CUDA_GRAPHS"] = "1"
 from whisper_at_client import WhisperATClient
 
@@ -85,7 +86,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        result = vad.has_speech(temp_path, threshold=0.49, verbose=True)
+        result = vad.has_speech(temp_path, threshold=VAD_THRESHOLD, verbose=True)
         if result:
             transcript,asr_status = transcribe_with_burst_filter(temp_path,helping_asr=True)
         else:

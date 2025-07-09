@@ -1,3 +1,4 @@
 v1.0.0, Working ASR with Short time brust based hallucination filter
 v1.0.1, version info added
 v1.0.2, Added Whisper AT with Audio Tagging as Fallback Mechanism, change thresold
+v1.0.3, VAD Added
