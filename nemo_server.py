@@ -59,11 +59,15 @@ def transcribe_with_burst_filter(filepath: str,helping_asr=False) -> str:
             else:
                 print(f"🚫 Short burst removed: '{seg['segment']}' ({duration:.2f}s)")
         text = " ".join(cleaned_segments).strip()
-        
+
         if helping_asr and len(text) < 1:
             response = whisper_at_client.transcribe(filepath)
             # print('AT Response',response)
             text = response.get("final_text","")
+            if 'DIAL' in text:
+                text = text
+            else:
+                text = ""
             asr_status = 'wat'
         return text,asr_status
     except:

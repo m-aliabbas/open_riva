@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   open_riva:
-    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/open_riva:v1.0.1         # or `build: .` if you prefer
+    image: 214882929820.dkr.ecr.us-east-1.amazonaws.com/open_riva:v1.0.5        # or `build: .` if you prefer
     container_name: open_riva
     ports:
       - "7005:7005"

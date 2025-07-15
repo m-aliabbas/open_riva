@@ -44,4 +44,4 @@ COPY . .
 
 
 EXPOSE 7006
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 7006 --workers ${UVICORN_WORKERS:-1}"]
+CMD ["sh", "-c", "python main.py --host 0.0.0.0 --port 7006 --workers ${UVICORN_WORKERS:-1}"]
