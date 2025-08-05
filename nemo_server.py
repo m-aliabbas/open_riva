@@ -32,7 +32,7 @@ def load_model():
     try:
         print("🔄 Loading ASR model...")
         asr_model = nemo_asr.models.ASRModel.from_pretrained(
-            model_name="nvidia/parakeet-tdt-0.6b-v2"
+            model_name="m-aliabbas1/para_tele_en"
         )
     except Exception as e:
         print(f"❌ Failed to load ASR model: {e}")
